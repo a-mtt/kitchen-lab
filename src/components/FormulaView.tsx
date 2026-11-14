@@ -18,7 +18,7 @@ export function FormulaView({ formula, ingredientMap }: { formula: Formula; ingr
                   <span>{ing?.name ?? 'Unknown ingredient'}</span>
                   <span className="ing-amount">
                     {formatAmount(l)}
-                    {l.unit === 'pc' && grams != null && <small className="muted"> ({fmt(grams, 0)} g)</small>}
+                    {l.unit !== 'g' && grams != null && <small className="muted"> ({fmt(grams, 0)} g)</small>}
                   </span>
                 </li>
               );

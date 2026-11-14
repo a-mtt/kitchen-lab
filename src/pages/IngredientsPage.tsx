@@ -80,6 +80,7 @@ export function IngredientsPage() {
                   <span>C {ing.carbs == null ? '—' : fmt(ing.carbs)}</span>
                   <span>Fi {ing.fiber == null ? '—' : fmt(ing.fiber)}</span>
                   {ing.gramsPerPiece && <span className="muted">1 pc = {fmt(ing.gramsPerPiece)} g</span>}
+                  {ing.gramsPerMl && <span className="muted">{fmt(ing.gramsPerMl, 2)} g/ml</span>}
                 </div>
               </button>
             </li>

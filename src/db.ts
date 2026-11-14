@@ -1,6 +1,13 @@
 import Dexie, { type EntityTable } from 'dexie';
 
-export type Unit = 'g' | 'pc';
+export type Unit = 'g' | 'ml' | 'tsp' | 'tbsp' | 'pc';
+export const VOLUME_UNITS = ['ml', 'tsp', 'tbsp'] as const;
+export type VolumeUnit = (typeof VOLUME_UNITS)[number];
+/** Millilitres in one unit. */
+export const ML_PER: Record<VolumeUnit, number> = { ml: 1, tsp: 5, tbsp: 15 };
+export function isVolume(unit: Unit): unit is VolumeUnit {
+  return unit === 'ml' || unit === 'tsp' || unit === 'tbsp';
+}
 
 export interface Ingredient {
   id: number;
@@ -13,6 +20,8 @@ export interface Ingredient {
   fiber: number | null;
   /** Optional weight of one piece, enables the "pc" unit. */
   gramsPerPiece: number | null;
+  /** Optional density for ml/tsp/tbsp. null = assume 1 g per ml. */
+  gramsPerMl: number | null;
   createdAt: number;
 }
 
@@ -61,6 +70,17 @@ db.version(1).stores({
   recipes: '++id, title, *tags',
   experiments: '++id, recipeId',
 });
+
+db.version(2)
+  .stores({})
+  .upgrade((tx) =>
+    tx
+      .table('ingredients')
+      .toCollection()
+      .modify((i) => {
+        if (i.gramsPerMl === undefined) i.gramsPerMl = null;
+      }),
+  );
 
 export const NUTRIENTS = ['kcal', 'protein', 'fat', 'carbs', 'fiber'] as const;
 export type Nutrient = (typeof NUTRIENTS)[number];

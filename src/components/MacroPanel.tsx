@@ -57,6 +57,12 @@ export function MacroPanel({ formula, ingredientMap, compareTo }: Props) {
       {m.missingValues.length > 0 && (
         <p className="warn">Incomplete: no nutrition values yet for {m.missingValues.join(', ')}.</p>
       )}
+      {m.assumedDensity.length > 0 && (
+        <p className="hint">
+          Estimated: assumes 1 g per ml for {m.assumedDensity.join(', ')}. Set “grams per ml” on the ingredient for
+          exact numbers.
+        </p>
+      )}
       {m.missingPieceWeight.length > 0 && (
         <p className="warn">Not counted: set a piece weight for {m.missingPieceWeight.join(', ')}.</p>
       )}

@@ -707,6 +707,9 @@ select:focus {
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: 10px;
 }
+.grid-fields.two {
+  grid-template-columns: 1fr 1fr;
+}
 
 .form-bar {
   position: sticky;
@@ -1088,4 +1091,131 @@ select:focus {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* ---------- Import ---------- */
+
+.link-button {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.back.link-button {
+  color: var(--muted);
+  font-weight: 500;
+}
+.row-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.import-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  line-height: 1.45;
+}
+@media (max-width: 640px) {
+  .import-text {
+    font-size: 16px;
+  }
+}
+.prompt-details summary,
+.values-details summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.prompt-text {
+  margin: 8px 0 0;
+  padding: 12px;
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+.import-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.import-row {
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--success);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.import-row.is-new {
+  border-left-color: var(--accent);
+}
+.import-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.import-name {
+  overflow-wrap: anywhere;
+}
+.import-name-input {
+  font-weight: 600;
+  padding: 6px 10px;
+}
+.import-row-qty {
+  display: grid;
+  grid-template-columns: 1fr 80px 36px;
+  gap: 8px;
+  align-items: center;
+}
+.badge-new {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.conflict {
+  background: var(--warn-soft);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.conflict ul {
+  margin: 0;
+  padding-left: 1.2em;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.check input {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  accent-color: var(--accent);
+}
+.values-details .grid-fields {
+  margin-top: 10px;
+}
+.head-buttons {
+  display: flex;
+  gap: 8px;
 }

@@ -10,7 +10,7 @@ interface Props {
   onDelete?: () => void;
 }
 
-type Fields = Record<Nutrient | 'gramsPerPiece', string>;
+type Fields = Record<Nutrient | 'gramsPerPiece' | 'gramsPerMl', string>;
 
 const toStr = (v: number | null | undefined) => (v == null ? '' : String(v));
 
@@ -32,6 +32,7 @@ export function IngredientForm({ initial, initialName, onSaved, onCancel, onDele
     carbs: toStr(initial?.carbs),
     fiber: toStr(initial?.fiber),
     gramsPerPiece: toStr(initial?.gramsPerPiece),
+    gramsPerMl: toStr(initial?.gramsPerMl),
   });
   const [saving, setSaving] = useState(false);
 
@@ -46,7 +47,11 @@ export function IngredientForm({ initial, initialName, onSaved, onCancel, onDele
         NUTRIENTS.map((n) => [n, parseOptional(fields[n], NUTRIENT_LABELS[n])]),
       ) as Record<Nutrient, number | null>;
       const gramsPerPiece = parseOptional(fields.gramsPerPiece, 'Grams per piece');
-      const saved = await saveIngredient({ name, ...values, gramsPerPiece: gramsPerPiece || null }, initial?.id);
+      const gramsPerMl = parseOptional(fields.gramsPerMl, 'Grams per ml');
+      const saved = await saveIngredient(
+        { name, ...values, gramsPerPiece: gramsPerPiece || null, gramsPerMl: gramsPerMl || null },
+        initial?.id,
+      );
       feedback.success(`Saved "${saved.name}".`);
       onSaved(saved);
     } catch (err) {
@@ -87,13 +92,23 @@ export function IngredientForm({ initial, initialName, onSaved, onCancel, onDele
         <p className="hint">You can leave values empty and fill them in later.</p>
       </fieldset>
 
-      <label className="field">
-        <span>
-          Weight of one piece <small>g, optional</small>
-        </span>
-        <input inputMode="decimal" value={fields.gramsPerPiece} onChange={set('gramsPerPiece')} placeholder="e.g. 55 for an egg" />
-        <span className="hint">Lets you add this ingredient by the piece in recipes.</span>
-      </label>
+      <div className="grid-fields two">
+        <label className="field">
+          <span>
+            Weight of one piece <small>g, optional</small>
+          </span>
+          <input inputMode="decimal" value={fields.gramsPerPiece} onChange={set('gramsPerPiece')} placeholder="e.g. 55 for an egg" />
+        </label>
+        <label className="field">
+          <span>
+            Grams per ml <small>optional</small>
+          </span>
+          <input inputMode="decimal" value={fields.gramsPerMl} onChange={set('gramsPerMl')} placeholder="e.g. 0.92 for oil" />
+        </label>
+      </div>
+      <p className="hint">
+        Piece weight lets you add it by the piece. Grams per ml makes ml, tsp and tbsp exact (1 g/ml is assumed if empty).
+      </p>
 
       <div className="modal-actions">
         {onDelete && (

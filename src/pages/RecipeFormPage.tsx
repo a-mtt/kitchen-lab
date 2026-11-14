@@ -2,10 +2,16 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { db, type Recipe } from '../db';
-import { FormulaEditor, draftToFormula, formulaToDraft, type FormulaDraft } from '../components/FormulaEditor';
+import { FormulaEditor } from '../components/FormulaEditor';
+import { draftToFormula, formulaToDraft, type FormulaDraft } from '../lib/formulaDraft';
 import { TagInput } from '../components/TagInput';
 import { useIngredientMap, useIngredients } from '../lib/hooks';
+import { useUnsavedGuard } from '../lib/useUnsavedGuard';
 import { useFeedback } from '../ui/feedback';
+
+const EMPTY_DRAFT: FormulaDraft = { lines: [], steps: [''], finalWeight: '' };
+const snap = (title: string, description: string, tags: string[], draft: FormulaDraft) =>
+  JSON.stringify({ title, description, tags, draft });
 
 export function RecipeFormPage() {
   const { id } = useParams();
@@ -22,8 +28,14 @@ export function RecipeFormPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState<string[]>([]);
-  const [draft, setDraft] = useState<FormulaDraft>({ lines: [], steps: [''], finalWeight: '' });
+  const [draft, setDraft] = useState<FormulaDraft>(EMPTY_DRAFT);
   const [saving, setSaving] = useState(false);
+  // What the form looked like when it opened, to detect unsaved changes.
+  const [snapshot, setSnapshot] = useState<string | null>(() =>
+    recipeId == null ? snap('', '', [], EMPTY_DRAFT) : null,
+  );
+  const dirty = snapshot !== null && snap(title, description, tags, draft) !== snapshot;
+  const guard = useUnsavedGuard(dirty);
 
   useEffect(() => {
     if (recipeId == null) return;
@@ -34,6 +46,7 @@ export function RecipeFormPage() {
         setDescription(r.description);
         setTags(r.tags);
         setDraft(formulaToDraft(r));
+        setSnapshot(snap(r.title, r.description, r.tags, formulaToDraft(r)));
       }
       setLoaded(true);
     });
@@ -54,6 +67,7 @@ export function RecipeFormPage() {
       if (recipeId != null) await db.recipes.update(recipeId, data);
       else savedId = await db.recipes.add({ ...data, createdAt: now } as Recipe);
       feedback.success(`Saved "${data.title}".`);
+      guard.allowLeave();
       navigate(`/recipes/${savedId}`, { replace: true });
     } catch (err) {
       feedback.fail(err, 'Could not save the recipe.');

@@ -1,9 +1,11 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { db, type Experiment, type ExperimentStatus, type Recipe } from '../db';
-import { FormulaEditor, draftToFormula, formulaToDraft, type FormulaDraft } from '../components/FormulaEditor';
+import { FormulaEditor } from '../components/FormulaEditor';
+import { draftToFormula, formulaToDraft, type FormulaDraft } from '../lib/formulaDraft';
 import { StatusPicker } from '../components/StatusPicker';
 import { useIngredientMap, useIngredients } from '../lib/hooks';
+import { useUnsavedGuard } from '../lib/useUnsavedGuard';
 import { useFeedback } from '../ui/feedback';
 
 export function ExperimentFormPage() {
@@ -20,6 +22,9 @@ export function ExperimentFormPage() {
   const [status, setStatus] = useState<ExperimentStatus>('untried');
   const [draft, setDraft] = useState<FormulaDraft | null>(null);
   const [saving, setSaving] = useState(false);
+  const [snapshot, setSnapshot] = useState<string | null>(null);
+  const dirty = snapshot !== null && JSON.stringify({ title, status, draft }) !== snapshot;
+  const guard = useUnsavedGuard(dirty);
 
   useEffect(() => {
     (async () => {
@@ -31,9 +36,11 @@ export function ExperimentFormPage() {
         setTitle(e.title);
         setStatus(e.status);
         setDraft(formulaToDraft(e));
+        setSnapshot(JSON.stringify({ title: e.title, status: e.status, draft: formulaToDraft(e) }));
       } else {
         // A new experiment starts as a copy of the current reference.
         setDraft(formulaToDraft(r));
+        setSnapshot(JSON.stringify({ title: '', status: 'untried', draft: formulaToDraft(r) }));
       }
       setRecipe(r);
     })();
@@ -62,6 +69,7 @@ export function ExperimentFormPage() {
       if (expId != null) await db.experiments.update(expId, data);
       else savedId = await db.experiments.add({ ...data, recipeId, createdAt: now } as Experiment);
       feedback.success(`Saved experiment "${data.title}".`);
+      guard.allowLeave();
       navigate(`/recipes/${recipeId}/experiments/${savedId}`, { replace: true });
     } catch (err) {
       feedback.fail(err, 'Could not save the experiment.');

@@ -1,6 +1,7 @@
-import { HashRouter, NavLink, Route, Routes, useLocation } from 'react-router-dom';
+import { createHashRouter, NavLink, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import { ExperimentDetailPage } from './pages/ExperimentDetailPage';
 import { ExperimentFormPage } from './pages/ExperimentFormPage';
+import { ImportPage } from './pages/ImportPage';
 import { IngredientsPage } from './pages/IngredientsPage';
 import { RecipeDetailPage } from './pages/RecipeDetailPage';
 import { RecipeFormPage } from './pages/RecipeFormPage';
@@ -10,7 +11,7 @@ import { FeedbackProvider } from './ui/feedback';
 function Nav() {
   const { pathname } = useLocation();
   const cls = ({ isActive }: { isActive: boolean }) => `nav-link ${isActive ? 'active' : ''}`;
-  const onRecipes = pathname === '/' || pathname.startsWith('/recipes');
+  const onRecipes = pathname === '/' || pathname.startsWith('/recipes') || pathname === '/import';
   return (
     <nav className="nav">
       <div className="nav-inner">
@@ -37,26 +38,37 @@ function Nav() {
   );
 }
 
-export default function App() {
+function Layout() {
   return (
-    // Hash routing keeps deep links working on static hosting such as GitHub Pages.
-    <HashRouter>
-      <FeedbackProvider>
-        <Nav />
-        <main className="main">
-          <Routes>
-            <Route path="/" element={<RecipeListPage />} />
-            <Route path="/recipes/new" element={<RecipeFormPage />} />
-            <Route path="/recipes/:id" element={<RecipeDetailPage />} />
-            <Route path="/recipes/:id/edit" element={<RecipeFormPage />} />
-            <Route path="/recipes/:id/experiments/new" element={<ExperimentFormPage />} />
-            <Route path="/recipes/:id/experiments/:expId" element={<ExperimentDetailPage />} />
-            <Route path="/recipes/:id/experiments/:expId/edit" element={<ExperimentFormPage />} />
-            <Route path="/ingredients" element={<IngredientsPage />} />
-            <Route path="*" element={<RecipeListPage />} />
-          </Routes>
-        </main>
-      </FeedbackProvider>
-    </HashRouter>
+    <FeedbackProvider>
+      <Nav />
+      <main className="main">
+        <Outlet />
+      </main>
+    </FeedbackProvider>
   );
+}
+
+// Hash routing keeps deep links working on static hosting such as GitHub Pages.
+// A "data router" is needed for the "Leave without saving?" guard.
+const router = createHashRouter([
+  {
+    element: <Layout />,
+    children: [
+      { path: '/', element: <RecipeListPage /> },
+      { path: '/import', element: <ImportPage /> },
+      { path: '/recipes/new', element: <RecipeFormPage key="new" /> },
+      { path: '/recipes/:id', element: <RecipeDetailPage /> },
+      { path: '/recipes/:id/edit', element: <RecipeFormPage key="edit" /> },
+      { path: '/recipes/:id/experiments/new', element: <ExperimentFormPage key="new" /> },
+      { path: '/recipes/:id/experiments/:expId', element: <ExperimentDetailPage /> },
+      { path: '/recipes/:id/experiments/:expId/edit', element: <ExperimentFormPage key="edit" /> },
+      { path: '/ingredients', element: <IngredientsPage /> },
+      { path: '*', element: <RecipeListPage /> },
+    ],
+  },
+]);
+
+export default function App() {
+  return <RouterProvider router={router} />;
 }

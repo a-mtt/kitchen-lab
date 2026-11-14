@@ -8,10 +8,21 @@ interface Props {
   ingredients: Ingredient[];
   excludeIds: number[];
   onPick: (ing: Ingredient) => void;
+  /** Offer "+ Create …" when nothing matches. */
+  allowCreate?: boolean;
+  placeholder?: string;
+  autoFocus?: boolean;
 }
 
 /** Search-as-you-type over saved ingredients, with "create new" when there's no exact match. */
-export function IngredientPicker({ ingredients, excludeIds, onPick }: Props) {
+export function IngredientPicker({
+  ingredients,
+  excludeIds,
+  onPick,
+  allowCreate = true,
+  placeholder = 'Search or add an ingredient…',
+  autoFocus,
+}: Props) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -24,7 +35,7 @@ export function IngredientPicker({ ingredients, excludeIds, onPick }: Props) {
     [ingredients, excludeIds, q],
   );
   const exact = ingredients.some((i) => i.name.toLocaleLowerCase() === q.toLocaleLowerCase());
-  const showCreate = q.length > 0 && !exact;
+  const showCreate = allowCreate && q.length > 0 && !exact;
   const total = options.length + (showCreate ? 1 : 0);
 
   const choose = (index: number) => {
@@ -42,7 +53,8 @@ export function IngredientPicker({ ingredients, excludeIds, onPick }: Props) {
       <input
         type="search"
         className="search"
-        placeholder="Search or add an ingredient…"
+        placeholder={placeholder}
+        autoFocus={autoFocus}
         value={query}
         role="combobox"
         aria-expanded={open && total > 0}
@@ -95,7 +107,7 @@ export function IngredientPicker({ ingredients, excludeIds, onPick }: Props) {
           )}
         </ul>
       )}
-      {open && q.length === 0 && ingredients.length === 0 && (
+      {allowCreate && open && q.length === 0 && ingredients.length === 0 && (
         <p className="hint">No saved ingredients yet. Type a name to create one.</p>
       )}
 

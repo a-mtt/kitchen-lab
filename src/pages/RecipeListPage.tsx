@@ -31,9 +31,14 @@ export function RecipeListPage() {
     <div className="page">
       <header className="page-head">
         <h1>Recipes</h1>
-        <Link className="btn btn-primary" to="/recipes/new">
-          + New recipe
-        </Link>
+        <div className="head-buttons">
+          <Link className="btn btn-ghost" to="/import">
+            Import
+          </Link>
+          <Link className="btn btn-primary" to="/recipes/new">
+            + New recipe
+          </Link>
+        </div>
       </header>
 
       <input
@@ -62,9 +67,14 @@ export function RecipeListPage() {
           {recipes.length === 0 ? (
             <>
               <p>No recipes yet.</p>
-              <Link className="btn btn-primary" to="/recipes/new">
-                Create your first recipe
-              </Link>
+              <div className="head-buttons">
+                <Link className="btn btn-ghost" to="/import">
+                  Import a recipe
+                </Link>
+                <Link className="btn btn-primary" to="/recipes/new">
+                  Create your first recipe
+                </Link>
+              </div>
             </>
           ) : (
             <p>No recipe matches your search.</p>
